@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import study.querydsl.board.product.inqury.ProductInqury;
+import study.querydsl.board.product.inqury.ProductInquryComments;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.Team;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.List;
 
 @Profile("local")
 @Component
@@ -37,8 +41,23 @@ public class InitMember {
 
             for (int i = 0; i < 100; i++) {
                 Team selectedTeam = i % 2 == 0 ? teamA : teamB;
-                em.persist(new Member("member"+i, i, selectedTeam));
+                Member member = new Member("member" + i, i, selectedTeam);
+                em.persist(member);
+
+                List<ProductInquryComments> commentsList = new ArrayList<>();
+                commentsList.add(new ProductInquryComments("commentSubject" + i, "commentContent" + i));
+                commentsList.add(new ProductInquryComments("commentSubject" + i+1, "commentContent" + i+1));
+                commentsList.add(new ProductInquryComments("commentSubject" + i+2, "commentContent" + i+2));
+
+                em.persist(ProductInqury.builder()
+                        .subject("subject" + i)
+                        .content("content" + i)
+                        .member(member)
+                        .productInquryComments(commentsList)
+                        .build());
             }
+
+
         }
     }
 }
